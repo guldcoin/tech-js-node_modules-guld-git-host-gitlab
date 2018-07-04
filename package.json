@@ -1,7 +1,7 @@
 {
-  "name": "guld-git-host-github",
-  "version": "0.1.1",
-  "description": "Guld configuration manager for github.",
+  "name": "guld-git-host-gitlab",
+  "version": "0.2.1",
+  "description": "Guld configuration manager for gitlab.",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha",
@@ -16,10 +16,8 @@
   "author": "isysd",
   "license": "MIT",
   "dependencies": {
-    "github-api": "^3.0.0",
-    "got": "^8.3.1",
-    "guld-git-config": "^1.1.2",
-    "guld-pass": "^0.5.0",
+    "got": "^8.3.2",
+    "guld-git-host": "^0.1.0",
     "guld-user": "^0.4.0"
   },
   "devDependencies": {

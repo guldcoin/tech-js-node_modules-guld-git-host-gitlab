@@ -1,96 +1,117 @@
-const GitHub = require('github-api')
 const { getName } = require('guld-user')
-const { getConfig } = require('guld-git-config')
-const { show, parsePass } = require('guld-pass')
+const { getPass, getHostName } = require('guld-git-host').util
 const got = require('got')
-var gh
+const HOST = 'gitlab'
+var client
 
-async function getGithubName (user) {
+async function getClient (user) {
   user = user || await getName()
-  var cfg = await getConfig('public', user)
-  if (cfg && cfg.host && cfg.host.github) return cfg.host.github
+  var pass = await getPass(user, HOST)
+  return async function (url, params, method = 'GET') {
+    if (url.indexOf('?') === -1) url = `${url}?`
+    for (var p in params) {
+      var uricomp = `${p}=${encodeURIComponent(params[p])}`
+      url = `${url}${uricomp}&`
+    }
+    url = url.replace(/[&?]{1}$/, '')
+    var resp = await got(url, {
+      headers: {
+        'Private-Token': pass.oauth
+      },
+      json: true,
+      method: method
+    })
+    if (resp.statusCode === undefined || resp.statusCode < 300) return resp.body
+    else throw new Error(`Gitlab API Error: ${resp.statusText || JSON.stringify(resp.body)}`)
+  }
 }
 
-async function getGithub (user) {
-  user = user || await getName()
-  var pass = parsePass(await show(`${user}/git/github`))
-  return new GitHub({
-    username: pass.login,
-    password: pass.password
-  })
+function parseRepo (repo) {
+  var mainbranch
+  if (repo.default_branch) mainbranch = repo.default_branch
+  else mainbranch = repo.owner.username
+  return {
+    name: repo.name,
+    privacy: repo.visibility,
+    owner: repo.owner.username,
+    mainbranch: mainbranch
+  }
 }
 
-async function createRepo (options, user) {
+async function getNamespaceId (user) {
   user = user || await getName()
-  var ghuser = await getGithubName(user) || user
+  client = client || await getClient(user)
+  var glns = await client(
+    `https://gitlab.com/api/v4/namespaces`,
+    { search: user }
+  )
+  return glns[0].id
+}
+
+async function getUserId (user) {
+  user = user || await getName()
+  var hostuser = await getHostName(user, HOST) || user
+  client = client || await getClient(user)
+  var users = await client(
+    `https://gitlab.com/api/v4/users`,
+    {username: hostuser}
+  )
+  return users[0].id
+}
+
+async function getRepoId (rname, user) {
+  user = user || await getName()
+  client = client || await getClient(user)
+  var userid = await getUserId()
+  var url = `https://gitlab.com/api/v4/users/${userid}/projects`
+  var repos = await client(url, {search: rname})
+  if (repos && repos.length === 1 && repos[0].id) return repos[0].id
+  else throw new Error('Repository not found.')
+}
+
+async function createRepo (rname, user, privacy = 'public', options = {}) {
+  user = user || await getName()
+  var hostuser = await getHostName(user, HOST) || user
+  client = client || await getClient(user)
   // validate required field(s)
-  if (!options.hasOwnProperty('name')) throw new Error('Name is required to create repo.')
-  // override destructive merge strategies
-  if (!options.hasOwnProperty('allow_squash_merge')) options.allow_squash_merge = false // eslint-disable-line camelcase
-  // if (!options.hasOwnProperty('allow_merge_commit')) options.allow_merge_commit = false
-  if (!options.hasOwnProperty('allow_rebase_merge')) options.allow_rebase_merge = false // eslint-disable-line camelcase
-  gh = gh || await getGithub(user)
-  var account = gh.getUser(ghuser)
-  var resp = await account.createRepo(options)
-  if (resp.status < 300) return resp.data
-  else throw new Error(`Github API Error: ${resp.statusText}`)
+  if (typeof rname !== 'string' || rname.length === 0) throw new Error('Name is required to create repo.')
+  var glnsid = await getNamespaceId(user)
+  var url = `https://gitlab.com/api/v4/projects`
+  var params = {
+    name: rname,
+    visibility: privacy,
+    default_branch: hostuser, // eslint-disable-line camelcase
+    namespace_id: glnsid // eslint-disable-line camelcase
+  }
+  var repo = await client(url, params, 'POST')
+  return parseRepo(repo)
 }
 
-async function listRepos (user) {
+async function listRepos (user, query) {
   user = user || await getName()
-  var ghuser = await getGithubName(user) || user
-  var url = `https://api.github.com/users/${ghuser}/repos`
-  var pass = parsePass(await show(`${user}/git/github`))
-  var resp = await got(url, {
-    auth: `${pass.login}:${pass.password}`,
-    json: true
-  })
-  return resp.body
+  var params = {}
+  client = client || await getClient(user)
+  var userid = await getUserId()
+  var url = `https://gitlab.com/api/v4/users/${userid}/projects`
+  if (query) params = {search: query}
+  var resp = await client(url, params)
+  return resp.map(parseRepo)
 }
 
 async function deleteRepo (rname, user) {
   user = user || await getName()
-  var ghuser = await getGithubName(user) || user
-  gh = gh || await getGithub(user)
-  var repo = gh.getRepo(ghuser, rname)
-  var resp = await repo.deleteRepo()
-  if (resp.status >= 300) throw new Error(`Github API Error: ${resp.statusText}`)
+  client = client || await getClient(user)
+  // validate required field(s)
+  if (typeof rname !== 'string' || rname.length === 0) throw new Error('Name is required to delete repo.')
+  var rid = await getRepoId(rname, user)
+  if (rid) {
+    var url = `https://gitlab.com/api/v4/projects/${rid}`
+    await client(url, {}, 'DELETE')
+  } else throw new Error('Repository not found.')
 }
-
-// TODO functions to port from guld-chrome
-/*
-async function getGHKeys () {
-  var keys = JSON.parse(await this.observer.curl(`https://api.github.com/users/${this.observer.hosts.github.name}/gpg_keys`))
-  if (keys.length !== 0) {
-    this.observer.hosts.github.keyid = keys[0].key_id
-    if (keys[0].emails.length !== 0) {
-      this.observer.hosts.github.mail = keys[0].emails[0].email
-    }
-  }
-}
-
-async function setupGHKey () { // eslint-disable-line no-unused-vars
-  if (!self.ghkeyid || self.ghkeyid.length === 0) {
-    return self.observer.curl(`https://api.github.com/user/gpg_keys`,
-      {
-        'method': 'POST',
-        'body': JSON.stringify({'armored_public_key': self.keyring.publicKeys.getForId(self.guldfpr).armor()})
-      }
-    ).then(getGHKeys)
-  } else return getGHKeys()
-}
-
-async function createPR (org, repo) {
-  return this.observer.hosts.github.client.getRepo(org, repo).createPullRequest({
-    title: 'guld app created tx PR',
-    head: `${self.guldname}:master`,
-    base: 'master'
-  })
-}
-*/
 
 module.exports = {
-  getGithub: getGithub,
+  getClient: getClient,
   createRepo: createRepo,
   listRepos: listRepos,
   deleteRepo: deleteRepo

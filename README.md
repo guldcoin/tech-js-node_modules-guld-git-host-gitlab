@@ -1,11 +1,11 @@
-# guld-git-host-github
+# guld-git-host-gitlab
 
-Guld configuration manager for github.
+Guld configuration manager for gitlab.
 
 ### Install
 
 ```
-npm i guld-git-host-github
+npm i guld-git-host-gitlab
 ```
 
 ### Usage
@@ -13,5 +13,5 @@ npm i guld-git-host-github
 ##### Node
 
 ```
-const github = require('guld-git-host-github')
+const gitlab = require('guld-git-host-gitlab')
 ```
