@@ -1,12 +1,12 @@
-const { getName } = require('guld-user')
-const { getPass, getHostName } = require('guld-git-host').util
+const { getName, getAlias } = require('guld-user')
+const { getPass } = require('guld-pass')
 const got = require('got')
 const HOST = 'gitlab'
 var client
 
 async function getClient (user) {
   user = user || await getName()
-  var pass = await getPass(user, HOST)
+  var pass = await getPass(`${user}/git/${HOST}`)
   return async function (url, params, method = 'GET') {
     if (url.indexOf('?') === -1) url = `${url}?`
     for (var p in params) {
@@ -50,7 +50,7 @@ async function getNamespaceId (user) {
 
 async function getUserId (user) {
   user = user || await getName()
-  var hostuser = await getHostName(user, HOST) || user
+  var hostuser = await getAlias(user, HOST) || user
   client = client || await getClient(user)
   var users = await client(
     `https://gitlab.com/api/v4/users`,
@@ -71,7 +71,7 @@ async function getRepoId (rname, user) {
 
 async function createRepo (rname, user, privacy = 'public', options = {}) {
   user = user || await getName()
-  var hostuser = await getHostName(user, HOST) || user
+  var hostuser = await getAlias(user, HOST) || user
   client = client || await getClient(user)
   // validate required field(s)
   if (typeof rname !== 'string' || rname.length === 0) throw new Error('Name is required to create repo.')

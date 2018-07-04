@@ -15,14 +15,14 @@ describe('gitlab', function () {
     this.repos = await listRepos(this.user)
     assert.exists(this.repos)
     assert.isTrue(this.repos.length > 0)
-  }).timeout(10000)
+  }).timeout(15000)
   it('createRepo', async function () {
     this.repo = await createRepo('guld-repo-for-test')
     assert.exists(this.repo)
     assert.exists(this.repo.name)
     assert.equal(this.repo.name, 'guld-repo-for-test')
-  }).timeout(10000)
+  }).timeout(15000)
   it('deleteRepo', async function () {
     this.repo = await deleteRepo('guld-repo-for-test')
-  }).timeout(10000)
+  }).timeout(15000)
 })
