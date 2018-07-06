@@ -1,26 +1,35 @@
 const { getName, getAlias } = require('guld-user')
 const { getPass } = require('guld-pass')
+const { getFS } = require('guld-fs')
 const got = require('got')
+const path = require('path')
+const home = require('user-home')
 const HOST = 'gitlab'
 var client
+var fs
 
 async function getClient (user) {
   user = user || await getName()
   var pass = await getPass(`${user}/git/${HOST}`)
   return async function (url, params, method = 'GET') {
-    if (url.indexOf('?') === -1) url = `${url}?`
-    for (var p in params) {
-      var uricomp = `${p}=${encodeURIComponent(params[p])}`
-      url = `${url}${uricomp}&`
-    }
-    url = url.replace(/[&?]{1}$/, '')
-    var resp = await got(url, {
+    var options = {
       headers: {
         'Private-Token': pass.oauth
       },
       json: true,
       method: method
-    })
+    }
+    if (method === 'GET') {
+      if (url.indexOf('?') === -1) url = `${url}?`
+      for (var p in params) {
+        var uricomp = `${p}=${encodeURIComponent(params[p])}`
+        url = `${url}${uricomp}&`
+      }
+      url = url.replace(/[&?]{1}$/, '')
+    } else {
+      options.body = params
+    }
+    var resp = await got(url, options)
     if (resp.statusCode === undefined || resp.statusCode < 300) return resp.body
     else throw new Error(`Gitlab API Error: ${resp.statusText || JSON.stringify(resp.body)}`)
   }
@@ -110,11 +119,32 @@ async function deleteRepo (rname, user) {
   } else throw new Error('Repository not found.')
 }
 
+async function addSSHKey (key) {
+  var user = await getName()
+  client = client || await getClient(user)
+  fs = fs || await getFS()
+  key = key || await fs.readFile(path.join(home, '.ssh', 'id_rsa.pub'), 'utf-8')
+  var url = `https://gitlab.com/api/v4/user/keys`
+  try {
+    await client(
+      url,
+      {
+        'key': key,
+        'title': 'guld-key'
+      },
+      'POST'
+    )
+  } catch (e) {
+    if (e.statusCode !== 400 || e.statusMessage !== 'Bad Request') throw e
+  }
+}
+
 module.exports = {
   getClient: getClient,
   createRepo: createRepo,
   listRepos: listRepos,
   deleteRepo: deleteRepo,
+  addSSHKey: addSSHKey,
   meta: {
     'url': 'gitlab.com',
     'oauth-required': true
