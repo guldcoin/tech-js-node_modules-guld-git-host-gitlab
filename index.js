@@ -10,7 +10,8 @@ var fs
 
 async function getClient (user) {
   user = user || await getName()
-  var pass = await getPass(`${user}/git/${HOST}`)
+  var passuser = process.env.PASSUSER || process.env.USER || user
+  var pass = await getPass(`${passuser}/git/${HOST}`)
   return async function (url, params, method = 'GET') {
     var options = {
       headers: {
