@@ -1,6 +1,6 @@
 {
   "name": "guld-git-host-gitlab",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Guld configuration manager for gitlab.",
   "main": "index.js",
   "scripts": {
