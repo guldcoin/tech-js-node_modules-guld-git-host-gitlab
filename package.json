@@ -18,8 +18,8 @@
   "dependencies": {
     "got": "^8.3.2",
     "guld-fs": "^1.2.5",
-    "guld-pass": "^0.5.1",
-    "guld-user": "^0.5.1",
+    "guld-pass": "^0.5.2",
+    "guld-user": "^0.5.2",
     "user-home": "^2.0.0"
   },
   "devDependencies": {
