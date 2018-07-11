@@ -1,6 +1,6 @@
 {
   "name": "guld-git-host-gitlab",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Guld configuration manager for gitlab.",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "got": "^8.3.2",
-    "guld-fs": "^1.2.9",
+    "guld-fs": "^1.2.11",
     "guld-pass": "^0.5.6",
     "guld-user": "^0.5.6",
     "user-home": "^2.0.0"
