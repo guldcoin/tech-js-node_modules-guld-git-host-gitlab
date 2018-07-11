@@ -17,9 +17,9 @@
   "license": "MIT",
   "dependencies": {
     "got": "^8.3.2",
-    "guld-fs": "^1.2.7",
-    "guld-pass": "^0.5.4",
-    "guld-user": "^0.5.4",
+    "guld-fs": "^1.2.8",
+    "guld-pass": "^0.5.5",
+    "guld-user": "^0.5.5",
     "user-home": "^2.0.0"
   },
   "devDependencies": {
