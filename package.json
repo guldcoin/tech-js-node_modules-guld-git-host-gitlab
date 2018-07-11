@@ -17,9 +17,9 @@
   "license": "MIT",
   "dependencies": {
     "got": "^8.3.2",
-    "guld-fs": "^1.2.5",
-    "guld-pass": "^0.5.2",
-    "guld-user": "^0.5.2",
+    "guld-fs": "^1.2.6",
+    "guld-pass": "^0.5.3",
+    "guld-user": "^0.5.3",
     "user-home": "^2.0.0"
   },
   "devDependencies": {
@@ -42,5 +42,7 @@
   "readme": "README.md",
   "engines": {
     "node": ">=7"
-  }
+  },
+  "homepage": "https://github.com/isysd/tech-js-node_modules-guld-git-host-gitlab#readme",
+  "repository": "git@github.com:isysd/tech-js-node_modules-guld-git-host-gitlab.git"
 }
