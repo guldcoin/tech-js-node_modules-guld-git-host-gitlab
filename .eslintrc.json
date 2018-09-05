@@ -1,14 +1,22 @@
 {
-    "extends": [
-        "eslint:recommended",
-        "standard"
+  "extends": [
+    "eslint:recommended",
+    "standard"
+  ],
+  "plugins": [
+    "json"
+  ],
+  "rules": {
+    "linebreak-style": [
+      "error",
+      "unix"
     ],
-    "plugins": [
-        "json"
+    "camelcase": [
+      "error",
+      {
+        "properties": "always"
+      }
     ],
-    "rules": {
-        "linebreak-style": ["error", "unix"],
-        "camelcase": ["error", {"properties": "always"}],
-        "prefer-template": "error"
-    }
+    "prefer-template": "error"
+  }
 }

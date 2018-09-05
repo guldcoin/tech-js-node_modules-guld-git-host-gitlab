@@ -1,7 +1,7 @@
 /* eslint-env node, mocha */
 const assert = require('chai').assert
 const { getName } = require('guld-user')
-const { getClient, listRepos, createRepo, deleteRepo, addSSHKey } = require('./index.js')
+const { getClient, listRepos, createRepo, deleteRepo, addSSHKey } = require('../index.js')
 
 describe('gitlab', function () {
   before(async function () {

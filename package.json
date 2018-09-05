@@ -6,12 +6,14 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha",
     "lint": "eslint --env browser *.js*",
-    "fix": "eslint --fix *.js*"
+    "fix": "eslint --fix *.js*",
+    "test:lint": "npm run lint && npm run test"
   },
   "keywords": [
     "guld",
     "cli",
-    "git"
+    "git",
+    "node"
   ],
   "author": "isysd",
   "license": "MIT",
@@ -19,7 +21,7 @@
     "got": "^8.3.2",
     "guld-fs": "^1.2.14",
     "guld-pass": "^0.5.9",
-    "guld-user": "^0.5.9",
+    "guld-user": "^0.5.12",
     "user-home": "^2.0.0"
   },
   "devDependencies": {
@@ -43,6 +45,6 @@
   "engines": {
     "node": ">=7"
   },
-  "homepage": "https://github.com/isysd/tech-js-node_modules-guld-git-host-gitlab#readme",
-  "repository": "git@github.com:isysd/tech-js-node_modules-guld-git-host-gitlab.git"
+  "homepage": "https://guld.tech/lib/guld-git-host-gitlab.html",
+  "repository": "https://bitbucket.org/guld/tech-js-node_modules-guld-git-host-gitlab"
 }
