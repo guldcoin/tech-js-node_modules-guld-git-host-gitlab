@@ -1,10 +1,10 @@
 {
   "name": "guld-git-host-gitlab",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "description": "Guld configuration manager for gitlab.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/_mocha",
+    "test": "PASSUSER=$USER; GULDNAME=$USER; ./node_modules/mocha/bin/_mocha",
     "lint": "eslint --env browser *.js*",
     "fix": "eslint --fix *.js*",
     "test:lint": "npm run lint && npm run test"
